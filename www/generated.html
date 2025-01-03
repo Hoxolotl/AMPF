@@ -1,0 +1,357 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <!-- Component CSS -->
+    <style>
+      /* extra-gol */
+      #board input[type="checkbox"] {
+      		appearance: none;
+      		width: 100%;
+      		aspect-ratio: 1;
+      		display: block;
+      		margin: 0;
+      	}
+      	#board input[type="checkbox"]:checked {
+      		background-color: black;
+      	}
+      	#board table {
+      		border-collapse: collapse;
+      		table-layout: fixed;
+      		width: 50vw;
+      		height: 50vw;
+      	}
+      	#board td {
+      		border: 1px solid #999;
+      		aspect-ratio: 1;
+      		position: relative;
+      		padding: 0;
+      	}
+      	body {
+      		display: grid;
+      		grid-template: "left right";
+      		height: 100vh;
+      		overflow: hidden;
+      	}
+      	main {
+      		grid-area: left;
+      		padding: 1em;
+      	}
+      	.source {
+      		grid-area: right;
+      		display: block;
+      		font-family: monospace;
+      		white-space: pre;
+      		height: 100%;
+      		overflow: auto;
+      		background-color: #0F0F0F;
+      		color: #FEFEFE;
+      	}
+    </style>
+    <!-- /Component CSS -->
+    <!-- Page CSS -->
+    <style>
+      
+    </style>
+    <!-- /Page CSS -->
+    <!-- Head HTML -->
+    <!-- signals -->
+    <script type="module">
+    	import { signal, effect } from 'https://cdn.jsdelivr.net/gh/poef/signals/src/signals.mjs'
+    </script>
+    <!-- /Head HTML -->
+    <script>
+      var simplyDataApi = {};
+      var simplyApp = {};
+      window.addEventListener("simply-content-loaded", function() {
+        simply.bind = false;
+        /* Raw API */
+        var simplyRawApi = {
+          "life" : "none"
+        };
+        /* End of Raw API */
+        /* Data API */
+        simplyDataApi = {
+          
+        };
+        /* End of Data API */
+        simplyApp = simply.app({
+          /* Actions */
+          actions: {
+            
+          },
+          /* /Actions */
+          /* Commands */
+          commands: {
+            
+          },
+          /* /Commands */
+          /* Routes */
+          routes: {
+            "/" : function() {
+              editor.pageData.page = 'Main'
+            },
+            "/" : function() {
+              editor.pageData.page = 'Main'
+            }
+          }
+          /* /Routes */
+        });
+      });
+      function clone(ob) {
+        return JSON.parse(JSON.stringify(ob));
+      }
+      function updateDataSource(name) {
+        document.querySelectorAll('[data-simply-data="'+name+'"]').forEach(function(list) {
+          editor.list.applyDataSource(list, name);
+          list.dataBindingPaused = 0;
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Body HTML -->
+    <!-- life -->
+    
+    <!-- /Body HTML -->
+    <!-- Component HTML templates -->
+    <template id="Main">
+      <h1>AMPF</h1>
+    <span>Awesome Multiplayer Pixel Flyer</span>
+    <simply-render rel="gol"> </simply-render>
+    </template>
+    <template id="gol">
+      <main>
+    <h1>Game of life</h1>
+    <div id="board"></div>
+    <form>
+    	<button data-command="increase">+</button>
+    </form>
+       	<button data-command="play">►</button>
+    	<button data-command="stop">■</button>
+    </main>
+    
+    
+    </template>
+    <!-- /Component HTML templates -->
+    <div class="main" data-simply-field="page" data-simply-content="template">
+    <!-- Page HTML templates -->
+    <template data-simply-template="Main">
+      <div>
+    	<simply-render rel="Main"></simply-render>
+      <div simply-render= "Main"></div>
+    </div>
+    </template>
+    <!-- /Page HTML templates -->
+    </div>
+    <script src="js/simply.everything.js"></script>
+    <script src="js/simply-edit.js" data-simply-storage="none" data-api-key="muze"></script>
+    <script>
+      /* Transformers */
+      editor.transformers = {
+        
+      };
+      /* /Transformers */
+    </script>
+    <script>
+      /* Sorters */
+      editor.sorters = {
+        
+      };
+      /* /Sorters */
+    </script>
+    <script>
+      window.addEventListener("simply-content-loaded", function() {
+        /* Data sources */
+        
+        /* /Data sources */
+      });
+    </script>
+    <!-- Foot HTML -->
+    <!-- life -->
+    <script type="module" >
+      import { signal, effect, clockEffect } from 'https://cdn.jsdelivr.net/gh/poef/signals/src/signals.mjs'
+      
+    // this class represents a single cell in a game of life matrix
+    	// it doesn't know its own position or the size of the board
+    	// it only knows which cells are its neighbours
+    	class Cell {
+    
+    		constructor(alive, renderClock, calcClock) {
+    			// setup state as a signal
+    			this.state = signal({
+    				alive: !!alive,
+    				neighbours: []
+    			})
+    			// so that effects are triggered on state change
+    			// first add an effect that calculates the next state
+    			// but only when the calcClock changes
+    			// so that we don't trigger cyclical dependencies
+    			// we cannot change the state.alive here, since that
+    			// would immediately influence the next state for each
+    			// neighbour, so the next board state could never be
+    			// calculated
+    			clockEffect(() => {
+    				let neighbourCount = this.state.neighbours
+    					.filter(nb => nb.state.alive)
+    					.length
+    				if (this.state.alive) {
+    					this.state.next = neighbourCount == 2 || neighbourCount == 3
+    				} else {
+    					this.state.next = neighbourCount == 3
+    				}
+    			}, calcClock)
+    			// than add an effect that sets the current state
+    			// to the next state, and resets the next state
+    			// but on a separate renderClock
+    			// so that we can do all the next state calculations first
+    			// and only then move the state
+    			clockEffect(() => {
+    				this.state.alive = this.state.next
+    				this.state.next = null // make sure that next calculation triggers change
+    				// if you don't update the next state, some cells won't
+    				// be re-calculated in the next renderClock step
+    			}, renderClock)
+    		}
+    		
+    		// because cells have a cyclical graph structure
+    		// we must be able to first create all cells
+    		// and then update each cells neighbours
+    		setNeighbours(neighbours) {
+    			this.state.neighbours = neighbours
+    		}
+    
+    		// use dom createElement to add each checkbox
+    		// so that we can attach event listeners and effects to it
+    		render() {
+    			// render each cell as a checkbox input
+    			// where a cell that is alive, is checked
+    			let checkbox = document.createElement('input')
+    			checkbox.type = 'checkbox'
+    
+    			// this updates the current cells state.alive when
+    			// you click the checkbox. Don't do this onchange
+    			// because that event will also trigger when we
+    			// change the checkbox.checked in an effect
+    			checkbox.addEventListener('click', evt => {
+    				this.state.alive = !!checkbox.checked
+    			})
+    
+    			// this effect is triggered whenever state.alive changes
+    			// and immediately updates the checkbox checked state to follow
+    			effect(() => {
+    				let checked = this.state.alive ? 'checked' : ''
+    				checkbox.checked = checked
+    			})
+    
+    			// return the checkbox, to let the board render it
+    			return checkbox
+    		}
+    	}
+    
+    	// this class renders a board of cells, you can specify the size
+    	// of the board
+    	// the board will tell each Cell who its neighbours are
+    	export class Board {
+    
+    		// boardSize is an array of [x,y]
+    		// renderClock and calcClock are passed to each cell
+    		constructor(boardSize, renderClock, calcClock) {
+    			this.size = boardSize
+    			this.rows = []
+    			// create all cells
+    			for (let y=0; y<this.size[1]; y++) {
+    				let row = []
+    				for (let x=0; x<this.size[0]; x++) {
+    					row[x] = new Cell(false, renderClock, calcClock)
+    				}
+    				this.rows[y] = row
+    			}
+    			// then find each cells neighbours and set those
+    			const offsets = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
+    			for (let y=0; y<this.size[1];y++) {
+    				for (let x=0; x<this.size[0];x++) {
+    					let neighbours = offsets
+    						.map(([dx,dy]) => this.rows[y+dy]?.[x+dx]) // retrieve cells based on each offset
+    						.filter(Boolean) // remove null / undefined cells
+    					this.rows[y][x].setNeighbours(neighbours)
+    				}
+    			}
+    		}
+    
+    		// renders a table with a Cell in each td
+    		// each cell will update itself, so we only need to render this once
+    		render() {
+    			let table = document.createElement('table')
+    			let y = 0
+    			for (let row of this.rows) {
+    				let tr = document.createElement('tr')
+    				let x = 0
+    				for (let cell of row) {
+    					let td = document.createElement('td')
+    					td.appendChild(cell.render(x,y))
+    					tr.appendChild(td)
+    					x++
+    				}
+    				table.appendChild(tr)
+    				y++
+    			}
+    			return table
+    		}
+    	}
+    
+    	// setup the global calcClock and renderClock
+    	const calcClock = signal({
+    		time: 0
+    	})
+    	const renderClock = signal({
+    		time: 0
+    	})
+    	// initialize the board
+    	const boardEl = document.getElementById('board')
+    	const boardSize = [25,25]
+    	const board = new Board(boardSize, renderClock, calcClock)
+    	boardEl.appendChild(board.render())
+    
+    	// add a handler to increase the clock times for both clocks, in order
+    	document.querySelectorAll('[data-command="increase"]').forEach(el => {
+    		el.addEventListener('click', (evt) => {
+    			calcClock.time++
+    			renderClock.time++
+    			evt.preventDefault()
+    		})
+    	})
+      
+      // playing
+      
+      let playstate = false
+      
+      function renderfield(){
+           		calcClock.time++
+    			renderClock.time++
+        		console.log("one step!")
+      }
+      
+      document.querySelectorAll('[data-command="stop"]').forEach(el => {
+          	el.addEventListener('click', (evt) => {
+              if(playstate){
+              	clearInterval(playstate)
+                playstate = false
+              }
+    		})
+    	})
+        
+      	// add a handler to increase the clock times for both clocks, in order
+    	document.querySelectorAll('[data-command="play"]').forEach(el => {
+          	el.addEventListener('click', (evt) => {
+             	if(!playstate){
+    				playstate = setInterval(renderfield, 500)
+                }        
+    		})
+    	})
+    </script>
+    <!-- signals -->
+    
+    <!-- /Foot HTML -->
+  </body>
+</html>

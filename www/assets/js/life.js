@@ -1,0 +1,152 @@
+import {signal, effect, clockEffect } from '/signals/src/signals.mjs';
+
+console.log("current path :", location.pathname)
+	// this class represents a single cell in a game of life matrix
+	// it doesn't know its own position or the size of the board
+	// it only knows which cells are its neighbours
+	class Cell {
+
+		constructor(alive, renderClock, calcClock) {
+			// setup state as a signal
+			this.state = signal({
+				alive: !!alive,
+				neighbours: []
+			})
+			// so that effects are triggered on state change
+			// first add an effect that calculates the next state
+			// but only when the calcClock changes
+			// so that we don't trigger cyclical dependencies
+			// we cannot change the state.alive here, since that
+			// would immediately influence the next state for each
+			// neighbour, so the next board state could never be
+			// calculated
+			clockEffect(() => {
+				let neighbourCount = this.state.neighbours
+					.filter(nb => nb.state.alive)
+					.length
+				if (this.state.alive) {
+					this.state.next = neighbourCount == 2 || neighbourCount == 3
+				} else {
+					this.state.next = neighbourCount == 3
+				}
+			}, calcClock)
+			// than add an effect that sets the current state
+			// to the next state, and resets the next state
+			// but on a separate renderClock
+			// so that we can do all the next state calculations first
+			// and only then move the state
+			clockEffect(() => {
+				this.state.alive = this.state.next
+				this.state.next = null // make sure that next calculation triggers change
+				// if you don't update the next state, some cells won't
+				// be re-calculated in the next renderClock step
+			}, renderClock)
+		}
+		
+		// because cells have a cyclical graph structure
+		// we must be able to first create all cells
+		// and then update each cells neighbours
+		setNeighbours(neighbours) {
+			this.state.neighbours = neighbours
+		}
+
+		// use dom createElement to add each checkbox
+		// so that we can attach event listeners and effects to it
+		render() {
+			// render each cell as a checkbox input
+			// where a cell that is alive, is checked
+			let checkbox = document.createElement('input')
+			checkbox.type = 'checkbox'
+
+			// this updates the current cells state.alive when
+			// you click the checkbox. Don't do this onchange
+			// because that event will also trigger when we
+			// change the checkbox.checked in an effect
+			checkbox.addEventListener('click', evt => {
+				this.state.alive = !!checkbox.checked
+			})
+
+			// this effect is triggered whenever state.alive changes
+			// and immediately updates the checkbox checked state to follow
+			effect(() => {
+				let checked = this.state.alive ? 'checked' : ''
+				checkbox.checked = checked
+			})
+
+			// return the checkbox, to let the board render it
+			return checkbox
+		}
+	}
+
+	// this class renders a board of cells, you can specify the size
+	// of the board
+	// the board will tell each Cell who its neighbours are
+	export class Board {
+
+		// boardSize is an array of [x,y]
+		// renderClock and calcClock are passed to each cell
+		constructor(boardSize, renderClock, calcClock) {
+			this.size = boardSize
+			this.rows = []
+			// create all cells
+			for (let y=0; y<this.size[1]; y++) {
+				let row = []
+				for (let x=0; x<this.size[0]; x++) {
+					row[x] = new Cell(false, renderClock, calcClock)
+				}
+				this.rows[y] = row
+			}
+			// then find each cells neighbours and set those
+			const offsets = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]
+			for (let y=0; y<this.size[1];y++) {
+				for (let x=0; x<this.size[0];x++) {
+					let neighbours = offsets
+						.map(([dx,dy]) => this.rows[y+dy]?.[x+dx]) // retrieve cells based on each offset
+						.filter(Boolean) // remove null / undefined cells
+					this.rows[y][x].setNeighbours(neighbours)
+				}
+			}
+		}
+
+		// renders a table with a Cell in each td
+		// each cell will update itself, so we only need to render this once
+		render() {
+			let table = document.createElement('table')
+			let y = 0
+			for (let row of this.rows) {
+				let tr = document.createElement('tr')
+				let x = 0
+				for (let cell of row) {
+					let td = document.createElement('td')
+					td.appendChild(cell.render(x,y))
+					tr.appendChild(td)
+					x++
+				}
+				table.appendChild(tr)
+				y++
+			}
+			return table
+		}
+	}
+
+	// setup the global calcClock and renderClock
+	const calcClock = signal({
+		time: 0
+	})
+	const renderClock = signal({
+		time: 0
+	})
+	// initialize the board
+	const boardEl = document.getElementById('board')
+	const boardSize = [50,50]
+	const board = new Board(boardSize, renderClock, calcClock)
+	boardEl.appendChild(board.render())
+
+	// add a handler to increase the clock times for both clocks, in order
+	document.querySelectorAll('[data-command="increase"]').forEach(el => {
+		el.addEventListener('click', (evt) => {
+			calcClock.time++
+			renderClock.time++
+			evt.preventDefault()
+		})
+	})

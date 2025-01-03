@@ -1,0 +1,42 @@
+#board input[type="checkbox"] {
+		appearance: none;
+		width: 100%;
+		aspect-ratio: 1;
+		display: block;
+		margin: 0;
+	}
+	#board input[type="checkbox"]:checked {
+		background-color: black;
+	}
+	#board table {
+		border-collapse: collapse;
+		table-layout: fixed;
+		width: 50vw;
+		height: 50vw;
+	}
+	#board td {
+		border: 1px solid #999;
+		aspect-ratio: 1;
+		position: relative;
+		padding: 0;
+	}
+	body {
+		display: grid;
+		grid-template: "left right";
+		height: 100vh;
+		overflow: hidden;
+	}
+	main {
+		grid-area: left;
+		padding: 1em;
+	}
+	.source {
+		grid-area: right;
+		display: block;
+		font-family: monospace;
+		white-space: pre;
+		height: 100%;
+		overflow: auto;
+		background-color: #0F0F0F;
+		color: #FEFEFE;
+	}
