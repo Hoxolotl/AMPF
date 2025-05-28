@@ -1,0 +1,28 @@
+{
+  "name": "ampf",
+  "version": "0.0.1",
+  "description": "Awesome multiplayer game of life",
+  "main": "www/generated.html",
+  "scripts": {
+    "test": "test "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hoxolotl/AMPF.git"
+  },
+  "keywords": [
+    "game",
+    "of",
+    "life",
+    "multiplayer",
+    "game",
+    "simplycode",
+    "simplyedit"
+  ],
+  "author": "Govert Combee",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Hoxolotl/AMPF/issues"
+  },
+  "homepage": "https://github.com/Hoxolotl/AMPF#readme"
+}
