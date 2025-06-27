@@ -72,6 +72,8 @@
 				let checked = this.state.alive ? 'checked' : ''
 				checkbox.checked = checked
 			})
+			
+			// add checked checkbox to data
 
 			// return the checkbox, to let the board render it
 			return checkbox
@@ -151,14 +153,34 @@
 		})
 	})
   
+	// add a way to save table state:
+	function getCheckedCoordinatesCSS() {
+		const checkedBoxes = []; 
+		const table = document.getElementById('board'); 
+		const allChecked = table.querySelectorAll('input[type="checkbox"]:checked'); 
+		allChecked.forEach(checkbox => { 
+			const cell = checkbox.closest('td'); 
+			const row = cell.parentNode.rowIndex; 
+			const col = cell.cellIndex; 
+			checkedBoxes.push({ 
+				row: row, col: col, coordinates: `(${row}, ${col})` 
+			}); 
+		}); 
+		console.log(checkedBoxes); 
+	}
+
+
+
   // playing
   
   let playstate = false
   
   function renderfield(){
+			getCheckedCoordinatesCSS()
        		calcClock.time++
 			renderClock.time++
     		console.log("one step!")
+			
   }
   
   document.querySelectorAll('[data-command="stop"]').forEach(el => {
