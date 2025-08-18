@@ -1,3 +1,3 @@
 function() {
-  editor.pageData.page = 'Main'
+  editor.pageData.page = 'MainPage'
 }

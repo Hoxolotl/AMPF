@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <!-- Component CSS -->
     <style>
+      /* player-css */
+      .player-color {
+      	background-color : green;
+      }
       /* extra-gol */
       #board input[type="checkbox"] {
       		appearance: none;
@@ -51,7 +55,28 @@
     <!-- /Component CSS -->
     <!-- Page CSS -->
     <style>
+      /* mainGrid */
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+        grid-auto-rows: minmax(100px, auto);
+      }
       
+      .column-left {
+          grid-column: 1;
+      	background-color: AliceBlue ;  
+      }
+      
+      .column-center {
+          grid-column: 2;
+      	background-color: AliceBlue ;  
+      }
+      
+      .column-right {
+          grid-column: 3;
+      	background-color: AliceBlue ;  
+      }
     </style>
     <!-- /Page CSS -->
     <!-- Head HTML -->
@@ -67,7 +92,12 @@
         simply.bind = false;
         /* Raw API */
         var simplyRawApi = {
-          "life" : "none"
+          "life" : "none",
+          "player" : function () {
+            let player = {
+          		"playerColor":"green",
+            }
+          }
         };
         /* End of Raw API */
         /* Data API */
@@ -94,10 +124,7 @@
           /* Routes */
           routes: {
             "/" : function() {
-              editor.pageData.page = 'Main'
-            },
-            "/" : function() {
-              editor.pageData.page = 'Main'
+              editor.pageData.page = 'MainPage'
             }
           }
           /* /Routes */
@@ -120,10 +147,29 @@
     
     <!-- /Body HTML -->
     <!-- Component HTML templates -->
+    <template id="CurrentPlayer">
+      <div>
+      <h1>Current player</h1>
+      <h2>Name: Hoxolotl</h2>
+      
+      <h3>Score: total score: 100050 px</h3>
+      <h3>Score: current point budget: 15001 px </h3>
+      
+      <h3 class="player-color">Player color</h3>
+    </div>
+    </template>
     <template id="Main">
       <h1>AMPF</h1>
     <span>Awesome Multiplayer Pixel Flyer</span>
     <simply-render rel="gol"> </simply-render>
+    </template>
+    <template id="ShipLibrary">
+      <div>
+      <h1>Ship Library</h1>
+      
+      
+      <button> Edit ship library </button>
+    </div>
     </template>
     <template id="gol">
       <main>
@@ -141,10 +187,17 @@
     <!-- /Component HTML templates -->
     <div class="main" data-simply-field="page" data-simply-content="template">
     <!-- Page HTML templates -->
-    <template data-simply-template="Main">
-      <div>
+    <template data-simply-template="MainPage">
+      <div class="grid-container">
+      <div class="column-left">
+        <simply-render rel="ShipLibrary"></simply-render>
+      </div>
+      <div class="column-center">
     	<simply-render rel="Main"></simply-render>
-      <div simply-render= "Main"></div>
+      </div>
+      <div class="column-right">
+        <simply-render rel="CurrentPlayer"></simply-render>
+      </div>
     </div>
     </template>
     <!-- /Page HTML templates -->
