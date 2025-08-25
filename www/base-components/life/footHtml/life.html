@@ -140,7 +140,7 @@
 	})
 	// initialize the board
 	const boardEl = document.getElementById('board')
-	const boardSize = [25,25]
+	const boardSize = [32,32]
 	const board = new Board(boardSize, renderClock, calcClock)
 	boardEl.appendChild(board.render())
 
@@ -163,10 +163,11 @@
 			const row = cell.parentNode.rowIndex; 
 			const col = cell.cellIndex; 
 			checkedBoxes.push({ 
-				row: row, col: col, coordinates: `(${row}, ${col})` 
+				row: row, col: col, coordinates: `(${row}, ${col})`,  playerColor: 'green', playerName: 'Hoxolotl'
 			}); 
 		}); 
-		console.log(checkedBoxes); 
+		console.log("these", checkedBoxes);
+		simply.app.life = checkedBoxes;
 	}
 
 
