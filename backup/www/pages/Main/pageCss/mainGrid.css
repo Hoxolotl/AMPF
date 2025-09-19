@@ -1,0 +1,21 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  grid-auto-rows: minmax(100px, auto);
+}
+
+.column-left {
+    grid-column: 1;
+	background-color: AliceBlue ;  
+}
+
+.column-center {
+    grid-column: 2;
+	background-color: AliceBlue ;  
+}
+
+.column-right {
+    grid-column: 3;
+	background-color: AliceBlue ;  
+}

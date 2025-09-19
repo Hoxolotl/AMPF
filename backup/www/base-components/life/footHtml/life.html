@@ -139,7 +139,7 @@
 		time: 0
 	})
 	// initialize the board
-	const boardEl = document.getElementById('board')
+	const boardEl = document.getElementById('oldboard')
 	const boardSize = [32,32]
 	const board = new Board(boardSize, renderClock, calcClock)
 	boardEl.appendChild(board.render())
@@ -156,7 +156,7 @@
 	// add a way to save table state:
 	function getCheckedCoordinatesCSS() {
 		const checkedBoxes = []; 
-		const table = document.getElementById('board'); 
+		const table = document.getElementById('oldboard'); 
 		const allChecked = table.querySelectorAll('input[type="checkbox"]:checked'); 
 		allChecked.forEach(checkbox => { 
 			const cell = checkbox.closest('td'); 

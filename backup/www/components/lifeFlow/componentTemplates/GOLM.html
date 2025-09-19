@@ -1,0 +1,20 @@
+
+
+ <h1>Well this is:</h1>
+<div class="GOLMap"></div>
+
+
+<script class="source" type="module">
+    import {signal, effect, batch} from '/js/simplyflow/src/state.mjs'
+	import {bind} from '/js/simplyflow/src/bind.mjs'
+	import {model, paging, sort, filter, columns, scroll} from '/js/simplyflow/src/model.mjs'
+    
+  	let GOLMap = document.querySelector(".GOLMap");
+	console.log("GOL MAPS: ", GOLMap)
+  
+   //document.getElementById('GOLMap').innerHTML = "BOOOTS!"
+    let GOLMapGrid = ""
+	
+    GOLMap.innerHTML = "HERE WILL BE A MAP"
+        
+</script>

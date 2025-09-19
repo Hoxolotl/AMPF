@@ -1,6 +1,6 @@
 function () {
             // clear old chart when 'plot' is clicked
-            document.getElementById('reg_plot').innerHTML = ""
+            document.getElementById('board').innerHTML = ""
 
             // Declare the chart dimensions and margins.
             const width = 320;
